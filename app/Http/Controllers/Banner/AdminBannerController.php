@@ -19,7 +19,7 @@ class AdminBannerController extends Controller
 
         return DataTables::of($data)
         ->addColumn('image', function ($data) {
-            $data = url('assets/images/'.$data->gambar_banner);
+            $data = url('storage/banner/'.$data->gambar_banner);
             $image = "<a target='_blank' href='{$data}'><img style='width:120px;' src='{$data}'></a>";
             return $image;
         })
@@ -66,7 +66,7 @@ class AdminBannerController extends Controller
             $tambahBanner->nama_banner = $request->nama_banner;
             if($request->hasFile('gambar_banner'))
             {
-                $request->file('gambar_banner')->move('assets/images/',$request->file('gambar_banner')->getClientOriginalName());
+                $request->file('gambar_banner')->move('storage/banner/',$request->file('gambar_banner')->getClientOriginalName());
                 $tambahBanner->gambar_banner = $request->file('gambar_banner')->getClientOriginalName();
             }
             
@@ -85,6 +85,64 @@ class AdminBannerController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    public function edit(Request $req)
+    {
+        $data = TbBanner::find($req->id);
+
+        return response()->json($data);
+    }
+
+    public function update(Request $request){
+        $validator = Validator::make($request->all(), [
+            'nama_banner' => ['required', 'string'],
+        ], [
+            'nama_banner.required' => 'Inputan Nama Banner Wajib Diisi!',
+            'nama_banner.string' => 'Inputan Nama Banner Harus Karakter/Huruf!',
+        ]);
+
+        try {
+
+            if ($validator->fails()) {
+                $pesan = '';
+                foreach ($validator->messages()->get('*') as $error) {
+                    foreach ($error as $q => $a) {
+                        $pesan .= '<b>- '.$a. '</b><br>';
+                    }
+                }
+                $solusi = substr($pesan, 0, -1);
+
+                $data['title'] = "Gagal";
+                $data['status'] = "error";
+                $data['timer'] = 5000;
+                $data['message'] = 'Gagal menambahkan data karena : <br>'.$solusi.'';
+
+                return response()->json($data);exit;
+            }
+
+            $dataBanner = TbBanner::find($request->idBanner);
+            $dataBanner->nama_banner = $request->nama_banner;
+            if($request->hasFile('gambar_banner'))
+            {
+                $request->file('gambar_banner')->move('storage/banner/',$request->file('gambar_banner')->getClientOriginalName());
+                $dataBanner->gambar_banner = $request->file('gambar_banner')->getClientOriginalName();
+            }
+            $dataBanner->save();
+
+            $data['title'] = "Berhasil";
+            $data['status'] = "success";
+            $data['timer'] = 2500;
+            $data['message'] = 'Data '.$dataBanner->nama_banner.' Berhasil diperbarui!';
+
+        } catch (\Throwable $th) {
+            $data['title'] = "Error";
+            $data['status'] = "error";
+            $data['timer'] = 5000;
+            $data['message'] = 'Data '.$dataBanner->nama_banner.' gagal diperbarui, karena'. $th;
+        }
+
+        return response()->json($data);        
     }
 
     public function delete(Request $req)

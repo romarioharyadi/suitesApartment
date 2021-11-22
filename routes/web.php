@@ -14,6 +14,8 @@ Route::prefix('admin')->name('admin.')->group(function() {
         Route::get('/index','App\Http\Controllers\Banner\AdminBannerController@index')->name('index');
         Route::get('/apiData', 'App\Http\Controllers\Banner\AdminBannerController@apiData')->name('apiData');
         Route::post('/saveBanner', 'App\Http\Controllers\Banner\AdminBannerController@save')->name('save');
+        Route::get('/editBanner', 'App\Http\Controllers\Banner\AdminBannerController@edit')->name('edit');
+        Route::post('/updateBanner', 'App\Http\Controllers\Banner\AdminBannerController@update')->name('update');
         Route::post('/deleteBanner', 'App\Http\Controllers\Banner\AdminBannerController@delete')->name('delete');
     });
     Route::prefix('room') -> name('room.')->group(function(){

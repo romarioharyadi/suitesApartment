@@ -30,7 +30,7 @@ class AdminRoomController extends Controller
             return 'Rp. '. number_format($data->harga,0,',','.');
         })
         ->addColumn('image', function ($data) {
-            $data = url('assets/img_apart/'.$data->image);
+            $data = url('storage/img_apart/'.$data->image);
             $image = "<a target='_blank' href='{$data}'><img style='width:120px;' src='{$data}'></a>";
             return $image;
         })

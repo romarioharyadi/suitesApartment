@@ -38,9 +38,16 @@
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="Nama Merchant" class="col-sm-2 col-form-label">Nama Banner</label>
+                            <input type="hidden" name="idBanner" id="idBanner">
+                            <label class="col-sm-2 col-form-label">Nama Banner</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control nama_banner" name="nama_banner" id="nama_banner" placeholder="Nama Banner">
+                            </div>
+                        </div>
+                        <div class="form-group" id="imgLama">
+                            <label class="col-sm-2 col-form-label" for="banner">Banner Lama</label>
+                            <div class="col-sm-10" id="imgLama2">
+                                
                             </div>
                         </div>
                         <div class="form-group">
@@ -51,7 +58,8 @@
                         </div>
                         <div class="modal-footer justify-content-between">
                             <button type="button" id="close-button" class="btn btn-danger" data-dismiss="modal"><i class="voyager-x"></i>Tutup</button>
-                            <button type="submit" class="btn btn-primary"><i class="voyager-tag"></i> Simpan</button>
+                            <button type="submit" id="save-banner" class="btn btn-primary"><i class="voyager-tag"></i> Simpan</button>
+                            <button type="submit" id="update-banner" class="btn btn-primary"><i class="voyager-tag"></i> Update</button>
                         </div>
                     </div>
                 </form>
@@ -95,9 +103,17 @@
         $('#form-data-upload').submit(function(e) {
             e.preventDefault();
             let formData = new FormData(this); 
+            var id = $('#idBanner').val();
+                
+            if (id == null || id == '') {
+                var url = "{{ route('admin.banner.save') }}";
+            } else {
+                var url = "{{ route('admin.banner.update') }}";
+            }
+
             $.ajax({
                 type:'POST',
-                url: "{{ route('admin.banner.save') }}",
+                url: url,
                 data: formData,
                 contentType: false,
                 processData: false,
@@ -111,10 +127,20 @@
                         showConfirmButton: false,
                     });
                     $('#modalData').modal('hide');
+                    $('#nama_banner').val();
+                    $('#gambar_banner').val();
                     table.ajax.reload();
                 },
                 error: function(data) {
-
+                    Swal.fire({
+                        title: `${data.title}`,
+                        icon: `${data.status}`,
+                        html: `${data.message}`,
+                        timer: `${data.timer}`,
+                        showConfirmButton: false,
+                    });
+                    $('#modalData').modal('hide');
+                    table.ajax.reload();
                 }
             });
         });
@@ -125,8 +151,37 @@
         $('.nama_banner').val('').attr('readonly', false);
         $('.gambar_banner').val('').attr('readonly', false);
         $('#modal-title').text('Form Banner');
-        $('#update-iklan').hide();
+        $('#update-banner').hide();
         $('#close-button').show();
+        $('#imgLama').hide();
+    }
+
+    function editData(id) {
+        $('#imgLama2').html('');
+        $.ajax({
+            type: 'GET',
+            url: '{{ route("admin.banner.edit") }}',
+            data: {
+                id : id
+            },
+            success: function(data) {
+                // console.log(data);
+                $('#imgLama').show();
+                $('#imgLama2').prepend(
+                    `<img src='${data.gambar_banner}' style='width:100px;'>`
+                );
+                $('#idBanner').val(id);
+                $('.nama_banner').attr('readonly', false).val(data.nama_banner);
+                $('#modalData').modal({backdrop: 'static', keyboard: false});
+                $('#modal-title').text('Perbarui Data Room ' + data.nama_banner);
+                $('#update-banner').show();
+                $('#save-banner').hide();
+                $('#close-button').show();
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        })
     }
     
     function deleteData(id) {
